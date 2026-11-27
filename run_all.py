@@ -10,7 +10,7 @@ for path in sorted(glob.glob(os.path.join(here, '*.sql'))):
     sql = open(path).read().replace('{CSV}', csv)
     sql = '\n'.join(l for l in sql.splitlines() if not l.strip().startswith('--'))  # drop comment lines first
     for stmt in [s.strip() for s in sql.split(';')]:
-        body = stmt
+        body = '\n'.join(l for l in stmt.splitlines() if not l.strip().startswith('--')).strip()  # trailing comments
         if not body: continue
         res = con.execute(body)
         if body.upper().startswith(('SELECT', 'WITH')):
