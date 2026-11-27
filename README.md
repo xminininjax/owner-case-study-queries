@@ -31,6 +31,7 @@ Month 0 = the partial month a restaurant joins. App launch = first month with 10
 | 8 | 6,486 negative-GMV orders (0.43%); 246 catering orders (20+ items); 468 incomplete orders (443 delivery orders with no delivery type + 25 with 0 items or $0); no duplicate order IDs; channel mix | 07_data_issues.sql | Exact |
 | 4 (talk track) | Month-1 sources: gradual daily ramp, ~8% coupon share throughout, Google-tagged ~54% of month-1 orders, 173 guests at 1.19 orders | 08_month1_sources.sql | Exact |
 
-## Not reproduced (original scripts were not kept)
-- Slide 6 / 11: "Web guests who switched to the App ordered 54% more afterwards, vs 28%". The exact switcher definition wasn't saved.
-- Former appendix slide (removed): "About 45% of App orders are new (14.3 pts / 31.4%)". Re-run on the same basis gives about 40%. Same file as the expected-orders row: 05_appendix_expected_orders.sql.
+## Not reproduced
+Every number on the current deck reproduces from these queries. Two figures from earlier drafts, no longer on the deck, did not:
+- "Web guests who switched to the App ordered 54% more afterwards, vs 28%". The exact switcher definition wasn't saved.
+- "About 45% of App orders are new". Re-run on the same basis gives about 40% (05_appendix_expected_orders.sql).
