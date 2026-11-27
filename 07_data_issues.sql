@@ -1,8 +1,7 @@
 -- 07  Slide 8: data issues (uses every row, before any cleaning)
--- Snowflake. Paste this whole file into a worksheet and click Run All (Ctrl+Shift+Enter). The table is set on the next line.
-SET orders_table = 'demo_db.public.product_analytics_case_v2';   -- <-- the Owner orders table (one row per order)
+-- Snowflake. Paste into a worksheet and click Run (or Run All). Reads demo_db.public.product_analytics_case_v2.
 
-WITH raw AS (SELECT * FROM IDENTIFIER($orders_table))
+WITH raw AS (SELECT * FROM demo_db.public.product_analytics_case_v2)
 SELECT COUNT(*) AS all_rows,                                                                  -- 1,514,681
        SUM(CASE WHEN gmv < 0 THEN 1 ELSE 0 END) AS negative_gmv,                              -- 6,486
        ROUND(100 * SUM(CASE WHEN gmv < 0 THEN 1 ELSE 0 END) / COUNT(*), 2) AS negative_gmv_pct,   -- 0.43

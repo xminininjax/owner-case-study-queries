@@ -17,22 +17,18 @@ If this gives an access error, the role or warehouse is wrong. Fix that before g
 ## Step 2: run a query
 1. Open any `.sql` file in this repo and copy all of it.
 2. Paste it into the worksheet, replacing what is there.
-3. Click **Run All** (Ctrl+Shift+Enter, or Cmd+Shift+Enter on a Mac). Running only the selected line will not work,
-   because the first line sets the table name that the query uses.
+3. Click **Run** (or Run All). Each file is a single query, so either works.
 4. The result shows below. The comments at the top of each file list the numbers you should see.
 
-The table name is set on line 3 of every file:
-```sql
-SET orders_table = 'demo_db.public.product_analytics_case_v2';
-```
-To run against a different copy of the data, change only that line.
+Every file reads `demo_db.public.product_analytics_case_v2` directly. To run against a different copy of the data,
+find and replace that name in the file.
 
 ### Column names the queries expect
 `ORDER_ID, LOCATION_ID, GUEST_ID, ORDER_CREATED_AT_PT, ORDER_SOURCE, ORDER_TYPE, DELIVERY_TYPE,
 UTM_SOURCE, HAS_COUPON, NUMBER_OF_ITEMS, GMV`. These match the CSV export headers. Snowflake treats unquoted
 names as case-insensitive, so upper or lower case both work. If a query fails with "invalid identifier", that
 column has a different name in the table: run `DESCRIBE TABLE demo_db.public.product_analytics_case_v2;` and
-rename it in the `orders AS (...)` block at the top of the file. `ORDER_CREATED_AT_PT` and `HAS_COUPON` are cast
+rename it in the `orders AS (...)` block near the top of the file. `ORDER_CREATED_AT_PT` and `HAS_COUPON` are cast
 to timestamp and boolean, so they work whether they were loaded as text or as typed columns.
 
 Shared rules (the `orders` block in every file): orders with GMV > 0 and 1+ items, May 2020 to Jun 2025.

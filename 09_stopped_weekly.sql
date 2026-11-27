@@ -1,12 +1,11 @@
 -- 09  Appendix slide 12: weekly orders of the 95 stopped restaurants before they stopped
--- Snowflake. Paste this whole file into a worksheet and click Run All (Ctrl+Shift+Enter). The table is set on the next line.
-SET orders_table = 'demo_db.public.product_analytics_case_v2';   -- <-- the Owner orders table (one row per order)
+-- Snowflake. Paste into a worksheet and click Run (or Run All). Reads demo_db.public.product_analytics_case_v2.
 
 WITH
 orders AS (   -- clean orders: GMV > 0, 1+ items, May 2020 to Jun 2025
   SELECT order_id, location_id, guest_id, order_created_at_pt::TIMESTAMP AS ts, order_source, order_type,
          delivery_type, has_coupon::BOOLEAN AS has_coupon, utm_source, number_of_items, gmv
-  FROM IDENTIFIER($orders_table)
+  FROM demo_db.public.product_analytics_case_v2
   WHERE gmv > 0 AND number_of_items > 0
     AND order_created_at_pt::TIMESTAMP >= '2020-05-01' AND order_created_at_pt::TIMESTAMP < '2025-07-01'
 ),

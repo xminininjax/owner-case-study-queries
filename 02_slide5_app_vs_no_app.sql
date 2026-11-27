@@ -1,12 +1,11 @@
 -- 02  Slide 5 (and slide 2 "+33 pts", slide 7 row 1): App vs no-App, 12 months, 42 launches vs 58 restaurants
--- Snowflake. Paste this whole file into a worksheet and click Run All (Ctrl+Shift+Enter). The table is set on the next line.
-SET orders_table = 'demo_db.public.product_analytics_case_v2';   -- <-- the Owner orders table (one row per order)
+-- Snowflake. Paste into a worksheet and click Run (or Run All). Reads demo_db.public.product_analytics_case_v2.
 
 WITH
 orders AS (   -- clean orders: GMV > 0, 1+ items, May 2020 to Jun 2025
   SELECT order_id, location_id, guest_id, order_created_at_pt::TIMESTAMP AS ts, order_source, order_type,
          delivery_type, has_coupon::BOOLEAN AS has_coupon, utm_source, number_of_items, gmv
-  FROM IDENTIFIER($orders_table)
+  FROM demo_db.public.product_analytics_case_v2
   WHERE gmv > 0 AND number_of_items > 0
     AND order_created_at_pt::TIMESTAMP >= '2020-05-01' AND order_created_at_pt::TIMESTAMP < '2025-07-01'
 ),
@@ -21,7 +20,7 @@ loc_first AS (   -- first and last order month per restaurant
   SELECT location_id, MIN(m) AS first_month, MAX(m) AS last_month FROM loc_month GROUP BY 1
 ),
 nums AS (   -- 0, 1, 2 ... 99
-  SELECT ROW_NUMBER() OVER (ORDER BY order_id) - 1 AS n FROM IDENTIFIER($orders_table) QUALIFY n < 100
+  SELECT ROW_NUMBER() OVER (ORDER BY order_id) - 1 AS n FROM demo_db.public.product_analytics_case_v2 QUALIFY n < 100
 ),
 loc_age AS (   -- every month from joining to Jun 2025, zero-filled. k = months since joining (k = 0 is the partial join month)
   SELECT f.location_id, nums.n AS k, DATEADD(month, nums.n, f.first_month) AS m,
