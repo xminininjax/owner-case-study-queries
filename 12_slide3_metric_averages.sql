@@ -1,5 +1,6 @@
 -- 12  Slide 3: average of each metric across everyone in the data
 -- Snowflake. Paste into a worksheet and click Run (or Run All). Reads demo_db.public.product_analytics_case_v2.
+-- Time is counted in 30-day periods from each restaurant's first order (period 1 = days 1 to 30), not calendar months.
 
 WITH
 orders AS (   -- clean orders: GMV > 0, 1+ items, May 2020 to Jun 2025
@@ -9,23 +10,33 @@ orders AS (   -- clean orders: GMV > 0, 1+ items, May 2020 to Jun 2025
   WHERE gmv > 0 AND number_of_items > 0
     AND order_created_at_pt::TIMESTAMP >= '2020-05-01' AND order_created_at_pt::TIMESTAMP < '2025-07-01'
 ),
-loc_month AS (   -- orders per restaurant per calendar month
-  SELECT location_id, DATE_TRUNC('month', ts)::DATE AS m,
-         COUNT(DISTINCT order_id) AS orders,
-         SUM(CASE WHEN order_source = 'App' THEN 1 ELSE 0 END) AS app_orders,
-         SUM(gmv) AS gmv
-  FROM orders GROUP BY 1, 2
+loc_first AS (   -- each restaurant's first and last order date
+  SELECT location_id, MIN(ts)::DATE AS first_d, MAX(ts)::DATE AS last_d FROM orders GROUP BY 1
 ),
-loc_first AS (   -- first and last order month per restaurant
-  SELECT location_id, MIN(m) AS first_month, MAX(m) AS last_month FROM loc_month GROUP BY 1
+loc_period AS (   -- orders per restaurant per 30-day period. k = 0 is days 1 to 30 after the first order (period 1), k = 1 is days 31 to 60 ...
+  SELECT o.location_id, FLOOR(DATEDIFF(day, f.first_d, o.ts::DATE) / 30) AS k,
+         COUNT(DISTINCT o.order_id) AS orders,
+         SUM(CASE WHEN o.order_source = 'App' THEN 1 ELSE 0 END) AS app_orders,
+         SUM(o.gmv) AS gmv
+  FROM orders o JOIN loc_first f ON f.location_id = o.location_id
+  GROUP BY 1, 2
 ),
-r AS (   -- every restaurant-month from month 1 (first full month) to the restaurant's last month
-  SELECT COUNT(DISTINCT lm.location_id) AS restaurants,                                   -- 294
-         ROUND(AVG(lm.orders)) AS avg_monthly_orders,                                    -- 289
-         ROUND(AVG(lm.gmv)) AS avg_monthly_gmv,                                          -- $13.2K
-         ROUND(AVG(CASE WHEN DATEDIFF(month, f.first_month, lm.m) = 12 THEN lm.orders END)) AS avg_orders_month_12   -- 297
-  FROM loc_month lm JOIN loc_first f ON f.location_id = lm.location_id
-  WHERE DATEDIFF(month, f.first_month, lm.m) >= 1
+nums AS (   -- 0, 1, 2 ... 99
+  SELECT ROW_NUMBER() OVER (ORDER BY order_id) - 1 AS n FROM demo_db.public.product_analytics_case_v2 QUALIFY n < 100
+),
+loc_age AS (   -- every full 30-day period from the first order to Jun 30 2025, zero-filled
+  SELECT f.location_id, nums.n AS k,
+         COALESCE(lp.orders, 0) AS orders, COALESCE(lp.app_orders, 0) AS app_orders, COALESCE(lp.gmv, 0) AS gmv
+  FROM loc_first f
+  JOIN nums ON DATEADD(day, 30 * (nums.n + 1), f.first_d) <= DATE '2025-07-01'
+  LEFT JOIN loc_period lp ON lp.location_id = f.location_id AND lp.k = nums.n
+),
+r AS (   -- every full 30-day period in which a restaurant had orders
+  SELECT COUNT(DISTINCT location_id) AS restaurants,                                       -- 294
+         ROUND(AVG(orders)) AS avg_orders_per_period,                                     -- 279
+         ROUND(AVG(gmv)) AS avg_gmv_per_period,                                           -- ~$12.8K
+         ROUND(AVG(CASE WHEN k = 11 THEN orders END)) AS avg_orders_period_12             -- 294
+  FROM loc_age WHERE orders > 0
 ),
 gf AS (SELECT location_id, guest_id, MIN(ts) AS first_ts FROM orders WHERE guest_id IS NOT NULL GROUP BY 1, 2),
 g AS (   -- every guest whose first order was Jan 2023 to Dec 2024, first 180 days
@@ -35,5 +46,5 @@ g AS (   -- every guest whose first order was Jan 2023 to Dec 2024, first 180 da
         WHERE gf.first_ts >= '2023-01-01' AND gf.first_ts < '2025-01-01'
         GROUP BY 1, 2)
 )
-SELECT r.*, g.*      -- guests 444,047 | 1.78 orders | $82.76
+SELECT r.*, g.*      -- guests 444,047 | 1.78 orders | $82.76 (unchanged: already in days)
 FROM r CROSS JOIN g;
