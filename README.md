@@ -25,6 +25,7 @@ Month 0 = the partial month a restaurant joins. App launch = first month with 10
 | 7 (appendix slide removed) | Expected-orders method (original 4-month, 85 launches): 216 / 242 / 277 orders, +15%, +$1,553 a month, $64K sizing | 05_appendix_expected_orders.sql | Within ~1 to 2%: re-run gives 216 / 242 / 280, +16%, +$1,532, $62.8K |
 | 12, 8, 7 | 95 stopped restaurants; 58 / 19 / 13 / 5 stop patterns; 64% vs 80% launched the App; 41 active restaurants without the App | 06_appendix_stopped_restaurants.sql | Exact |
 | 13 | Stopped restaurants' weekly orders: ~57 a week until the final week, then zero (74 with 26+ weeks); 90 of 95 busy in final week; stops spread 2023 to 2025, max 3 on one day | 09_appendix_stopped_weekly.sql | Exact |
+| 7 (row 3) | 14% bigger App orders: 185 restaurants, 83 App guests and 128 App orders a month at $39; +~$700 a month (+4% of $16.6K Owner GMV); App guest value $104 to $118 | 10_slide7_order_size.sql | Exact |
 | 8 | 6,486 negative-GMV orders (0.43%); no duplicate order IDs; channel mix | 07_data_issues.sql | Exact |
 | 4 (talk track) | Month-1 sources: gradual daily ramp, ~8% coupon share throughout, Google-tagged ~54% of month-1 orders, 173 guests at 1.19 orders | 08_month1_sources.sql | Exact |
 
