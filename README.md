@@ -4,8 +4,8 @@ Every number in the deck comes from the Owner order table (1,514,681 orders, 295
 May 2020 to Jul 2025). It holds **Owner Web and App orders only** (plus under 900 POS and Phone orders):
 no in-store, third-party phone or delivery-app sales.
 
-The `snowflake/` folder is the main version. Each file is one self-contained query: no temp tables,
-no setup file, and no need to run them in order.
+Every `.sql` file in this repo is one self-contained Snowflake query: no temp tables, no setup file,
+and no need to run them in order.
 
 ## Step 1: check you can see the table
 Open a new Snowflake worksheet, choose role **DE_CASE_JORDANNGO_ROLE** and warehouse **CASE_WH**, then run:
@@ -15,7 +15,7 @@ SELECT COUNT(*) FROM demo_db.public.product_analytics_case_v2;   -- expect 1,514
 If this gives an access error, the role or warehouse is wrong. Fix that before going on.
 
 ## Step 2: run a query
-1. Open any file in `snowflake/` and copy all of it.
+1. Open any `.sql` file in this repo and copy all of it.
 2. Paste it into the worksheet, replacing what is there.
 3. Click **Run All** (Ctrl+Shift+Enter, or Cmd+Shift+Enter on a Mac). Running only the selected line will not work,
    because the first line sets the table name that the query uses.
@@ -41,7 +41,7 @@ App launch = first month with 10+ App orders.
 
 ## Slide-by-slide map
 
-| Slide | Figures | File in `snowflake/` |
+| Slide | Figures | File |
 |---|---|---|
 | 2, 4 | 147 restaurants; ~60 orders in month 0, 197 in month 1, 320 in month 12; +2.8% a month from month 3 to 12 | 01_slide4_growth_cohort.sql |
 | 2, 5, 7, 10 | 42 App launches vs 58 comparison restaurants, still ordering every month; gap +4 pts at month 1 to +33 pts at month 12 (153% vs 120%) | 02_slide5_app_vs_no_app.sql |
@@ -55,16 +55,8 @@ App launch = first month with 10+ App orders.
 | 10 | App launch groups 17 / 130 / 55 / 18 / 75; in the test 5 + 35 + 2 = 42 | 04_appendix_app_launch_groups.sql |
 | 12 | Weekly orders before stopping: ~57 a week, 49 in the final week, then 0 (all 95); 90 of 95 had 5+ orders in their final week; stops spread 2023 to 2025, at most 3 on one day | 09_stopped_weekly.sql |
 
-Every figure above reproduces exactly from these queries (checked against the full export).
-
-## Other version: DuckDB on the CSV (optional)
-`duckdb/` holds the same analysis for running on a laptop against the CSV export, with no Snowflake needed.
-It gives the same numbers. The data file is not in this repo.
-```
-pip install duckdb pandas
-python duckdb/run_all.py /path/to/Untitled_2026-11-22-2124.csv
-```
+Every figure above reproduces exactly from these queries (checked against the full data).
 
 ## Not on the current deck
-- `duckdb/05_appendix_expected_orders.sql`: an earlier draft's 4-month method ($64K sizing). Replaced by `02` and `11`. Kept for reference only, so it has no Snowflake version.
+- There is no file 05: it held an earlier draft's 4-month method ($64K sizing), which was replaced by `02` and `11`.
 - Two figures from earlier drafts did not reproduce and were removed: "Web guests who switched to the App ordered 54% more" (switcher definition not saved) and "about 45% of App orders are new" (re-run gives about 40%).
