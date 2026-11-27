@@ -1,6 +1,6 @@
--- 03  Slides 6 and 11: guest value in the first 180 days, Web-only vs App-only guests
+-- 03  Slides 6 and 11: guest value in the first 6 months (180 days), Web-only vs App-only guests
 -- Snowflake. Paste into a worksheet and click Run (or Run All). Reads demo_db.public.product_analytics_case_v2.
--- Time is counted in 30-day periods from each restaurant's first order (period 1 = days 1 to 30), not calendar months.
+-- A month here = 30 days since the event (joining Owner or App launch), not a calendar month. Month 1 = the first 30 days.
 
 WITH
 orders AS (   -- clean orders: GMV > 0, 1+ items, May 2020 to Jun 2025
@@ -13,7 +13,7 @@ orders AS (   -- clean orders: GMV > 0, 1+ items, May 2020 to Jun 2025
 loc_first AS (   -- each restaurant's first and last order date
   SELECT location_id, MIN(ts)::DATE AS first_d, MAX(ts)::DATE AS last_d FROM orders GROUP BY 1
 ),
-loc_period AS (   -- orders per restaurant per 30-day period. k = 0 is days 1 to 30 after the first order (period 1), k = 1 is days 31 to 60 ...
+loc_mo AS (   -- orders per restaurant per month since joining. k = 0 is month 1, k = 1 is month 2 ...
   SELECT o.location_id, FLOOR(DATEDIFF(day, f.first_d, o.ts::DATE) / 30) AS k,
          COUNT(DISTINCT o.order_id) AS orders,
          SUM(CASE WHEN o.order_source = 'App' THEN 1 ELSE 0 END) AS app_orders,
@@ -24,14 +24,14 @@ loc_period AS (   -- orders per restaurant per 30-day period. k = 0 is days 1 to
 nums AS (   -- 0, 1, 2 ... 99
   SELECT ROW_NUMBER() OVER (ORDER BY order_id) - 1 AS n FROM demo_db.public.product_analytics_case_v2 QUALIFY n < 100
 ),
-loc_age AS (   -- every full 30-day period from the first order to Jun 30 2025, zero-filled
+loc_age AS (   -- every full month since joining, up to Jun 30 2025, zero-filled
   SELECT f.location_id, nums.n AS k,
          COALESCE(lp.orders, 0) AS orders, COALESCE(lp.app_orders, 0) AS app_orders, COALESCE(lp.gmv, 0) AS gmv
   FROM loc_first f
   JOIN nums ON DATEADD(day, 30 * (nums.n + 1), f.first_d) <= DATE '2025-07-01'
-  LEFT JOIN loc_period lp ON lp.location_id = f.location_id AND lp.k = nums.n
+  LEFT JOIN loc_mo lp ON lp.location_id = f.location_id AND lp.k = nums.n
 ),
-app_launch AS (   -- App launch date = start of the first 30-day period with 10+ App orders
+app_launch AS (   -- App launch date = start of the first month with 10+ App orders
   SELECT a.location_id, DATEADD(day, 30 * MIN(a.k), f.first_d) AS launch_d
   FROM loc_age a JOIN loc_first f ON f.location_id = a.location_id
   WHERE a.app_orders >= 10 GROUP BY a.location_id, f.first_d

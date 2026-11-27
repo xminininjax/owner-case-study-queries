@@ -1,6 +1,6 @@
--- 01  Slides 2 and 4: the 147 restaurants, average orders in each 30-day period, periods 1 to 12
+-- 01  Slides 2 and 4: the 147 restaurants, average orders in each month since joining, months 1 to 12
 -- Snowflake. Paste into a worksheet and click Run (or Run All). Reads demo_db.public.product_analytics_case_v2.
--- Time is counted in 30-day periods from each restaurant's first order (period 1 = days 1 to 30), not calendar months.
+-- A month here = 30 days since the event (joining Owner or App launch), not a calendar month. Month 1 = the first 30 days.
 
 WITH
 orders AS (   -- clean orders: GMV > 0, 1+ items, May 2020 to Jun 2025
@@ -13,7 +13,7 @@ orders AS (   -- clean orders: GMV > 0, 1+ items, May 2020 to Jun 2025
 loc_first AS (   -- each restaurant's first and last order date
   SELECT location_id, MIN(ts)::DATE AS first_d, MAX(ts)::DATE AS last_d FROM orders GROUP BY 1
 ),
-loc_period AS (   -- orders per restaurant per 30-day period. k = 0 is days 1 to 30 after the first order (period 1), k = 1 is days 31 to 60 ...
+loc_mo AS (   -- orders per restaurant per month since joining. k = 0 is month 1, k = 1 is month 2 ...
   SELECT o.location_id, FLOOR(DATEDIFF(day, f.first_d, o.ts::DATE) / 30) AS k,
          COUNT(DISTINCT o.order_id) AS orders,
          SUM(CASE WHEN o.order_source = 'App' THEN 1 ELSE 0 END) AS app_orders,
@@ -24,12 +24,12 @@ loc_period AS (   -- orders per restaurant per 30-day period. k = 0 is days 1 to
 nums AS (   -- 0, 1, 2 ... 99
   SELECT ROW_NUMBER() OVER (ORDER BY order_id) - 1 AS n FROM demo_db.public.product_analytics_case_v2 QUALIFY n < 100
 ),
-loc_age AS (   -- every full 30-day period from the first order to Jun 30 2025, zero-filled
+loc_age AS (   -- every full month since joining, up to Jun 30 2025, zero-filled
   SELECT f.location_id, nums.n AS k,
          COALESCE(lp.orders, 0) AS orders, COALESCE(lp.app_orders, 0) AS app_orders, COALESCE(lp.gmv, 0) AS gmv
   FROM loc_first f
   JOIN nums ON DATEADD(day, 30 * (nums.n + 1), f.first_d) <= DATE '2025-07-01'
-  LEFT JOIN loc_period lp ON lp.location_id = f.location_id AND lp.k = nums.n
+  LEFT JOIN loc_mo lp ON lp.location_id = f.location_id AND lp.k = nums.n
 ),
 loc_month AS (   -- calendar months are used only to pick the cohort (still ordering a year apart)
   SELECT location_id, DATE_TRUNC('month', ts)::DATE AS m FROM orders GROUP BY 1, 2
@@ -43,12 +43,12 @@ cohort AS (   -- ordered in the same month (Jan to Jun) of 2024 and 2025, and th
     AND DATEDIFF(month, fm.first_month, prev.m) >= 3
 ),
 curve AS (
-  SELECT a.k + 1 AS period, COUNT(*) AS restaurants, AVG(a.orders) AS avg_orders
+  SELECT a.k + 1 AS month_num, COUNT(*) AS restaurants, AVG(a.orders) AS avg_orders
   FROM loc_age a JOIN cohort c ON c.location_id = a.location_id
   WHERE a.k BETWEEN 0 AND 11 GROUP BY 1
 )
-SELECT period,                                  -- 1 = days 1 to 30, 12 = days 331 to 360
+SELECT month_num,                                  -- months since joining, 1 to 12
        restaurants,                             -- 147
-       ROUND(avg_orders, 1) AS avg_orders       -- period 1: 152, period 3: 237, period 12: 318
+       ROUND(avg_orders, 1) AS avg_orders       -- month 1: 152, month 3: 237, month 12: 318
 FROM curve
-ORDER BY period;
+ORDER BY month_num;
