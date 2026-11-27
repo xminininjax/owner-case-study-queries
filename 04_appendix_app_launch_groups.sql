@@ -1,8 +1,12 @@
 -- 04_appendix_app_launch_groups.sql  (appendix slide 10)
+-- Needs 00_base.sql and the launch table from 02_slide5_app_vs_no_app.sql.
 -- When each of the 295 restaurants launched the App (first month with 10+ App orders), by age at launch.
--- "In the test" (original 4-month test) = launched 3+ months after joining and has 3+ months of data after launch.
+-- "In the test" = the same rule as slide 5's 42 App launches: launched 3+ months after joining,
+-- has 12 months of data after launch, and has orders every month from 3 months before launch to 12 months after.
 WITH x AS (
-  SELECT l.location_id, f.first_month, l.la, l.max_age
+  SELECT l.location_id, f.first_month, l.la,
+         l.la >= 3 AND l.la + 11 <= l.max_age
+           AND (SELECT min(orders) FROM loc_age a WHERE a.location_id = l.location_id AND a.k BETWEEN l.la - 3 AND l.la + 11) > 0 AS in_test
   FROM launch l JOIN loc_first f USING (location_id))
 SELECT CASE WHEN la IS NULL THEN '5 Never launched'
             WHEN first_month < DATE '2023-01-01' AND la >= 3 THEN '1 Joined before the App existed (pre-2023)'
@@ -10,5 +14,5 @@ SELECT CASE WHEN la IS NULL THEN '5 Never launched'
             WHEN la <= 5 THEN '3 3 to 5 months after joining'
             ELSE '4 6+ months after joining' END AS launch_group,
        count(*) AS restaurants,
-       sum(CASE WHEN la >= 3 AND la + 3 <= max_age THEN 1 ELSE 0 END) AS in_test
-FROM x GROUP BY 1 ORDER BY 1;                                       -- 17/16, 130/0, 55/55, 18/14, 75
+       sum(CASE WHEN in_test THEN 1 ELSE 0 END) AS in_test
+FROM x GROUP BY 1 ORDER BY 1;                                       -- 17/5, 130/0, 55/35, 18/2, 75  (42 in the test)
