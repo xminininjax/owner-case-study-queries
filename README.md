@@ -18,6 +18,7 @@ Month 0 = the partial month a restaurant joins. App launch = first month with 10
 
 | Slide | Figure | File | Status |
 |---|---|---|---|
+| 3 | Average across everyone: 289 orders a month, 297 orders in month 12, $13.2K GMV a month (294 restaurants); 1.78 orders and $82.76 per guest in 180 days (444K guests, 2023-2024) | 12_slide3_metric_averages.sql | Exact |
 | 2, 4 | 147 restaurants; 197 orders in month 1 to 320 in month 12; ~60 in month 0; +2.8% a month after month 3 | 01_slide4_growth_cohort.sql | Exact |
 | 2, 5, 7 | App vs no-App over 12 months, restaurants still ordering: 42 launches, 58 comparison restaurants, gap +4 pts at +1 to +33 pts at +12 (153% vs 120%) | 02_slide5_app_vs_no_app.sql | Exact |
 | 6, 11 | Guest value, first 180 days: Web 1.46 x $47.61 = $69.60; App 2.53 x ~$40.9 = ~$103.5 (+49%); 90 and 365-day checks | 03_slide6_guest_value.sql | Exact |
@@ -27,10 +28,9 @@ Month 0 = the partial month a restaurant joins. App launch = first month with 10
 | 12 | Stopped restaurants' weekly orders: ~57 a week until the final week, then zero (all 95); 90 of 95 busy in final week; stops spread 2023 to 2025, max 3 on one day | 09_appendix_stopped_weekly.sql | Exact |
 | 7 (row 3) | 14% bigger App orders: 185 restaurants, 83 App guests and 128 App orders a month at $39; +~$700 a month (+4% of $16.6K Owner GMV); App guest value $104 to $118 | 10_slide7_order_size.sql | Exact |
 | 7 (rows 1, 2) | ~$125K a month: 41 restaurants without the App x ~$461K monthly Owner GMV x 27% (slide 5 gap); +$34 per guest moving Web to App | 11_slide7_app_gap_sizing.sql | Exact |
-| 8 | 6,486 negative-GMV orders (0.43%); no duplicate order IDs; channel mix | 07_data_issues.sql | Exact |
+| 8 | 6,486 negative-GMV orders (0.43%); 246 catering orders (20+ items); 468 incomplete orders (443 delivery orders with no delivery type + 25 with 0 items or $0); no duplicate order IDs; channel mix | 07_data_issues.sql | Exact |
 | 4 (talk track) | Month-1 sources: gradual daily ramp, ~8% coupon share throughout, Google-tagged ~54% of month-1 orders, 173 guests at 1.19 orders | 08_month1_sources.sql | Exact |
 
 ## Not reproduced (original scripts were not kept)
 - Slide 6 / 11: "Web guests who switched to the App ordered 54% more afterwards, vs 28%". The exact switcher definition wasn't saved.
 - Former appendix slide (removed): "About 45% of App orders are new (14.3 pts / 31.4%)". Re-run on the same basis gives about 40%. Same file as the expected-orders row: 05_appendix_expected_orders.sql.
-- Slide 8: catering (246 orders) and incomplete orders (468) counts. The exact flag rules weren't saved.
