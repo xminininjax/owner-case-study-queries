@@ -1,4 +1,5 @@
--- 05_appendix_expected_orders.sql  (appendix slide 11, slide 7 "$64K")
+-- 05_appendix_expected_orders.sql  (NOT on the current deck: an earlier draft's 4-month method and $64K sizing,
+-- replaced by the 12-month gap in 02 and the sizing in 11_slide7_app_gap_sizing.sql. Kept for reference.)
 -- ORIGINAL 4-month method (85 launches). Restaurants that later went quiet are counted as zero here,
 -- unlike slide 5. Expected = own pre-launch average x growth of same-age restaurants without the App.
 CREATE OR REPLACE TABLE t85 AS

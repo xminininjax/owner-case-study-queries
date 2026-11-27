@@ -1,4 +1,4 @@
--- 10_slide7_order_size.sql  (slide 7, row 3 impact and footnote)
+-- 10_slide7_order_size.sql  (slide 7 row 3 impact and footnote; appendix slide 11)
 -- Needs 00_base.sql. Restaurant-months from Jul 2024 to Jun 2025 with the App live (10+ App orders that month).
 WITH lm AS (
   SELECT location_id, date_trunc('month', ts) AS m,

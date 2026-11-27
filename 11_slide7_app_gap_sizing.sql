@@ -1,4 +1,4 @@
--- 11_slide7_app_gap_sizing.sql  (slide 7, rows 1 and 2)
+-- 11_slide7_app_gap_sizing.sql  (slide 7 rows 1 and 2; appendix slide 11)
 -- Needs 00_base.sql.
 -- Row 1: the 41 active restaurants without the App (06_appendix_stopped_restaurants.sql), their average
 -- monthly Owner GMV over Apr to Jun 2025, times the slide 5 gap at month 12: 152.9% / 120.2% - 1 = ~27%.

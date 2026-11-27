@@ -1,37 +1,41 @@
 # Owner case study: queries behind the deck
 
 Every number in the deck comes from one file: the Owner order export `Untitled_2026-11-22-2124.csv`
-(1,514,681 orders, 295 restaurant locations, May 2020 to Jul 2025). It holds **Owner Web and App orders only**:
-no in-store, phone or delivery-app sales.
+(1,514,681 orders, 295 restaurant locations, May 2020 to Jul 2025). It holds **Owner Web and App orders only**
+(plus under 900 POS and Phone orders): no in-store, third-party phone or delivery-app sales.
+
+**The data file is not in this repo.** Point the run script at your own copy.
 
 ## How to run
 ```
 pip install duckdb pandas
 python run_all.py /path/to/Untitled_2026-11-22-2124.csv
 ```
-`run_all.py` runs the `.sql` files in order (DuckDB SQL) and prints each result. `00_base.sql` must run first.
+`run_all.py` runs every `.sql` file in name order (DuckDB SQL) and prints each result. Later files reuse
+tables built by earlier ones (`00_base.sql` first; `04` needs the `launch` table from `02`).
 
-Shared rules (00_base.sql): orders with GMV > 0 and 1+ items, May 2020 to Jun 2025. A "restaurant" is one location.
-Month 0 = the partial month a restaurant joins. App launch = first month with 10+ App orders.
+Shared rules (`00_base.sql`): orders with GMV > 0 and 1+ items, May 2020 to Jun 2025. A "restaurant" is one location.
+Month 0 = the partial month a restaurant joins; month 1 = its first full month. App launch = first month with 10+ App orders.
 
 ## Slide-by-slide map
 
-| Slide | Figure | File | Status |
-|---|---|---|---|
-| 3 | Average across everyone: 289 orders a month, 297 orders in month 12, $13.2K GMV a month (294 restaurants); 1.78 orders and $82.76 per guest in 180 days (444K guests, 2023-2024) | 12_slide3_metric_averages.sql | Exact |
-| 2, 4 | 147 restaurants; 197 orders in month 1 to 320 in month 12; ~60 in month 0; +2.8% a month after month 3 | 01_slide4_growth_cohort.sql | Exact |
-| 2, 5, 7 | App vs no-App over 12 months, restaurants still ordering: 42 launches, 58 comparison restaurants, gap +4 pts at +1 to +33 pts at +12 (153% vs 120%) | 02_slide5_app_vs_no_app.sql | Exact |
-| 6, 11 | Guest value, first 180 days: Web 1.46 x $47.61 = $69.60; App 2.53 x ~$40.9 = ~$103.5 (+49%); 90 and 365-day checks | 03_slide6_guest_value.sql | Exact |
-| 10 | App launch groups: 17 / 130 / 55 / 18 / 75; in test (slide 5 rule, 12 months after launch) 5 + 35 + 2 = 42 | 04_appendix_app_launch_groups.sql | Exact |
-| 7 (appendix slide removed) | Expected-orders method (original 4-month, 85 launches): 216 / 242 / 277 orders, +15%, +$1,553 a month, $64K sizing | 05_appendix_expected_orders.sql | Within ~1 to 2%: re-run gives 216 / 242 / 280, +16%, +$1,532, $62.8K |
-| 8, 7 (appendix slide removed) | 95 stopped restaurants; 58 / 19 / 13 / 5 stop patterns; 64% vs 80% launched the App; 41 active restaurants without the App | 06_appendix_stopped_restaurants.sql | Exact |
-| 12 | Stopped restaurants' weekly orders: ~57 a week until the final week, then zero (all 95); 90 of 95 busy in final week; stops spread 2023 to 2025, max 3 on one day | 09_appendix_stopped_weekly.sql | Exact |
-| 7 (row 3) | 14% bigger App orders: 185 restaurants, 83 App guests and 128 App orders a month at $39; +~$700 a month (+4% of $16.6K Owner GMV); App guest value $104 to $118 | 10_slide7_order_size.sql | Exact |
-| 7 (rows 1, 2) | ~$125K a month: 41 restaurants without the App x ~$461K monthly Owner GMV x 27% (slide 5 gap); +$34 per guest moving Web to App | 11_slide7_app_gap_sizing.sql | Exact |
-| 8 | 6,486 negative-GMV orders (0.43%); 246 catering orders (20+ items); 468 incomplete orders (443 delivery orders with no delivery type + 25 with 0 items or $0); no duplicate order IDs; channel mix | 07_data_issues.sql | Exact |
-| 4 (talk track) | Month-1 sources: gradual daily ramp, ~8% coupon share throughout, Google-tagged ~54% of month-1 orders, 173 guests at 1.19 orders | 08_month1_sources.sql | Exact |
+| Slide | Figures | File |
+|---|---|---|
+| 2, 4 | 147 restaurants; ~60 orders in month 0, 197 in month 1, 320 in month 12; +2.8% a month from month 3 to 12 | 01_slide4_growth_cohort.sql |
+| 2, 5, 7, 10 | 42 App launches vs 58 comparison restaurants, still ordering every month; gap +4 pts at month 1 to +33 pts at month 12 (153% vs 120%) | 02_slide5_app_vs_no_app.sql |
+| 3 | Averages across everyone: 289 orders a month, 297 in month 12, $13.2K GMV a month (294 restaurants); 1.78 orders and $82.76 per guest in 180 days (444K guests) | 12_slide3_metric_averages.sql |
+| 4 (talk track) | Month-1 sources: ~8% coupon share, ~54% Google-tagged, 173 guests at 1.19 orders | 08_month1_sources.sql |
+| 6, 11 | First 180 days: Web 237,293 guests, 1.46 orders x $47.61 = $69.60; App 42,537 guests, 2.53 x $40.92 = $103.56 (+49%, 1.7x, -14%) | 03_slide6_guest_value.sql |
+| 7 row 1, 11 | ~$125K a month: 41 restaurants without the App make ~$461K a month x 27% (153% / 120%) | 11_slide7_app_gap_sizing.sql |
+| 7 row 2, 11 | +$34 per guest moving from Web to App: $103.56 - $69.60 | 11_slide7_app_gap_sizing.sql |
+| 7 row 3, 11 | 185 App restaurants, 83 App guests and 128 App orders a month at $39 (~$5,000); +14% = ~$700 a month; guest value $104 to $118 | 10_slide7_order_size.sql |
+| 7, 8, 12 | 95 stopped restaurants; 41 active restaurants without the App | 06_appendix_stopped_restaurants.sql |
+| 8 | 6,486 negative-GMV orders (0.43%); 246 catering orders (20+ items, 0.02%); 468 incomplete orders (443 delivery orders with no delivery type + 25 with 0 items or $0, 0.03%) | 07_data_issues.sql |
+| 10 | App launch groups 17 / 130 / 55 / 18 / 75; in the test 5 + 35 + 2 = 42 | 04_appendix_app_launch_groups.sql |
+| 12 | Weekly orders before stopping: ~57 a week, 49 in the final week, then 0 (all 95); 90 of 95 had 5+ orders in their final week; stops spread 2023 to 2025, at most 3 on one day | 09_appendix_stopped_weekly.sql |
 
-## Not reproduced
-Every number on the current deck reproduces from these queries. Two figures from earlier drafts, no longer on the deck, did not:
-- "Web guests who switched to the App ordered 54% more afterwards, vs 28%". The exact switcher definition wasn't saved.
-- "About 45% of App orders are new". Re-run on the same basis gives about 40% (05_appendix_expected_orders.sql).
+Every figure above reproduces exactly from the queries.
+
+## Not on the current deck
+- `05_appendix_expected_orders.sql`: an earlier draft's 4-month method ($64K sizing). Replaced by `02` and `11`. Kept for reference.
+- Two figures from earlier drafts did not reproduce and were removed: "Web guests who switched to the App ordered 54% more" (switcher definition not saved) and "about 45% of App orders are new" (re-run gives about 40%).

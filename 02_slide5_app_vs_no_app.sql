@@ -1,4 +1,4 @@
--- 02_slide5_app_vs_no_app.sql  (slide 5, slide 2 "+33 pts")
+-- 02_slide5_app_vs_no_app.sql  (slide 5; slide 2 "+33 pts"; slide 7 row 1 gap; slide 10 "42")
 -- App launch = first month with 10+ App orders. la = restaurant age (months since first order month) at launch.
 CREATE OR REPLACE TABLE launch AS
 SELECT f.location_id,

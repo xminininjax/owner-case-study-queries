@@ -1,4 +1,4 @@
--- 03_slide6_guest_value.sql  (slide 6 and appendix slide 12)
+-- 03_slide6_guest_value.sql  (slide 6 and appendix slide 11)
 -- Guest = a guest ID at one restaurant. Only guests whose first order came after that restaurant
 -- launched the App (first calendar month with 10+ App orders), first order Jan 2023 - Dec 2024
 -- (so every guest has a full 180 days before the data ends in Jun 2025).
