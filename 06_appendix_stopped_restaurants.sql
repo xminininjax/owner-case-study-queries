@@ -1,4 +1,4 @@
--- 06_appendix_stopped_restaurants.sql  (appendix slide 12, data-issue row 5, slide 7 "41 restaurants")
+-- 06_appendix_stopped_restaurants.sql  (data-issue row 5, slide 7 "41 restaurants")
 -- Stopped = last order month before May 2025.
 CREATE OR REPLACE TABLE loc_status AS
 SELECT f.location_id, f.first_month, f.last_month,

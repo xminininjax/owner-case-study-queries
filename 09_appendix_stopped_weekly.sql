@@ -1,4 +1,4 @@
--- 09_appendix_stopped_weekly.sql  (appendix slide 13: stopped restaurants' orders over time)
+-- 09_appendix_stopped_weekly.sql  (appendix slide 12: stopped restaurants' orders over time)
 -- Needs 00_base.sql. Stopped = last order before May 2025 (same 95 as 06_appendix_stopped_restaurants.sql).
 CREATE OR REPLACE TABLE loc_days AS
 SELECT location_id, min(ts)::DATE AS first_d, max(ts)::DATE AS last_d FROM orders GROUP BY 1;
